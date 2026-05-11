@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockMart — Control de Inventarios</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">Stock<span>Mart</span></div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('inventario')">
+      <span class="nav-icon">📦</span> Inventario
+    </div>
+    <div class="nav-item" onclick="navigate('proveedores')">
+      <span class="nav-icon">🏭</span> Proveedores
+    </div>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Resumen general del inventario</div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--card-color: var(--accent)">
+        <div class="stat-label">Total Productos</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-icon">📦</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--warn)">
+        <div class="stat-label">Stock Bajo</div>
+        <div class="stat-value" id="stat-low">0</div>
+        <div class="stat-icon">⚠️</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--danger)">
+        <div class="stat-label">Sin Stock</div>
+        <div class="stat-value" id="stat-empty">0</div>
+        <div class="stat-icon">🚫</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--accent2)">
+        <div class="stat-label">Proveedores</div>
+        <div class="stat-value" id="stat-prov">0</div>
+        <div class="stat-icon">🏭</div>
+      </div>
+    </div>
+
+    <div id="alert-section"></div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-header">⚠️ Productos con stock bajo</div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>Producto</th><th>Cantidad</th><th>Estado</th></tr></thead>
+            <tbody id="dash-low-table"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">Sin alertas 🎉</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">📋 Últimos productos agregados</div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th></tr></thead>
+            <tbody id="dash-recent-table"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">Sin productos aún</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTARIO -->
+  <div class="page" id="page-inventario">
+    <div class="page-title">Inventario</div>
+    <div class="page-sub">Gestión de productos del supermercado</div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-inv" placeholder="Buscar producto..." oninput="renderInventario()">
+      </div>
+      <select class="filter" id="filter-cat" onchange="renderInventario()">
+        <option value="">Todas las categorías</option>
+        <option value="Lácteos">Lácteos</option>
+        <option value="Bebidas">Bebidas</option>
+        <option value="Carnes">Carnes</option>
+        <option value="Frutas y Verduras">Frutas y Verduras</option>
+        <option value="Panadería">Panadería</option>
+        <option value="Limpieza">Limpieza</option>
+        <option value="Otros">Otros</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal()">+ Agregar Producto</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Proveedor</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="inv-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROVEEDORES -->
+  <div class="page" id="page-proveedores">
+    <div class="page-title">Proveedores</div>
+    <div class="page-sub">Gestión de proveedores registrados</div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-prov" placeholder="Buscar proveedor..." oninput="renderProveedores()">
+      </div>
+      <button class="btn btn-primary" onclick="openProvModal()">+ Agregar Proveedor</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Categoría que surte</th>
+            <th>Productos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="prov-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL PRODUCTO -->
+<div class="modal-overlay" id="modal-producto">
+  <div class="modal">
+    <div class="modal-title" id="modal-producto-title">Agregar Producto</div>
+    <div class="form-group">
+      <label>Nombre del producto</label>
+      <input type="text" id="inp-nombre" placeholder="Ej: Leche Entera 1L">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="inp-cat">
+          <option value="Lácteos">Lácteos</option>
+          <option value="Bebidas">Bebidas</option>
+          <option value="Carnes">Carnes</option>
+          <option value="Frutas y Verduras">Frutas y Verduras</option>
+          <option value="Panadería">Panadería</option>
+          <option value="Limpieza">Limpieza</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Proveedor</label>
+        <select id="inp-prov"><option value="">-- Sin proveedor --</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Cantidad</label>
+        <input type="number" id="inp-cantidad" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Precio ($)</label>
+        <input type="number" id="inp-precio" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Stock mínimo (alerta)</label>
+      <input type="number" id="inp-minimo" placeholder="5" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROVEEDOR -->
+<div class="modal-overlay" id="modal-proveedor">
+  <div class="modal">
+    <div class="modal-title" id="modal-prov-title">Agregar Proveedor</div>
+    <div class="form-group">
+      <label>Nombre del proveedor</label>
+      <input type="text" id="pinp-nombre" placeholder="Ej: Distribuidora Martínez">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="text" id="pinp-tel" placeholder="555-000-0000">
+      </div>
+      <div class="form-group">
+        <label>Categoría que surte</label>
+        <select id="pinp-cat">
+          <option value="Lácteos">Lácteos</option>
+          <option value="Bebidas">Bebidas</option>
+          <option value="Carnes">Carnes</option>
+          <option value="Frutas y Verduras">Frutas y Verduras</option>
+          <option value="Panadería">Panadería</option>
+          <option value="Limpieza">Limpieza</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeProvModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarProveedor()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
