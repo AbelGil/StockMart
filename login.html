@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — StockMart</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Estilos extra solo para centrar el login */
+    body { display: flex; align-items: center; justify-content: center; background: var(--surface2); }
+    .login-card { background: var(--surface); padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); width: 400px; max-width: 90vw; border: 1px solid var(--border); }
+    .login-card .logo { border-bottom: none; padding: 0; margin-bottom: 30px; text-align: center; font-size: 2rem; }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="logo">Stock<span>Mart</span></div>
+    
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="admin@stockmart.com">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••">
+    </div>
+    
+    <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="iniciarSesion()">Ingresar al Sistema</button>
+    <div class="error-msg" id="login-error">Credenciales incorrectas</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script>
+    // Conexión a tu Supabase
+    const supabaseUrl = 'https://fprbravswyywufwwmvwy.supabase.co';
+    const supabaseKey = 'sb_publishable_1_QgPFym2E7U_zfsRr0D3A_kj7ve4aj';
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function iniciarSesion() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-pass').value;
+      const errorMsg = document.getElementById('login-error');
+      
+      errorMsg.style.display = 'none';
+
+      if(!email || !password) {
+        errorMsg.textContent = 'Llena todos los campos';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // Función mágica de Supabase para iniciar sesión
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        errorMsg.textContent = 'Usuario o contraseña incorrectos';
+        errorMsg.style.display = 'block';
+      } else {
+        // Si entra, lo mandamos al dashboard
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>
