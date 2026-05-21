@@ -10,8 +10,12 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="logo">Stock<span>Mart</span></div>
-  <nav class="nav">
+  <div class="sidebar-header">
+    <div class="logo">Stock<span>Mart</span></div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+  </div>
+
+  <nav class="nav" id="nav-menu">
     <div class="nav-item active" onclick="navigate('dashboard')">
       <span class="nav-icon">📊</span> Dashboard
     </div>
@@ -22,7 +26,7 @@
       <span class="nav-icon">🏭</span> Proveedores
     </div>
     
-    <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 24px;">
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 24px;" class="nav-divider">
     
     <div class="nav-item" onclick="cerrarSesion()" style="color: var(--danger);">
       <span class="nav-icon">🚪</span> Cerrar Sesión

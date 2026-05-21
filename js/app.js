@@ -398,3 +398,8 @@ document.getElementById('modal-proveedor').addEventListener('click', e => { if (
 document.addEventListener('DOMContentLoaded', () => {
   cargarDatosNube();
 });
+
+// ── MENÚ HAMBURGUESA MÓVIL ─────────────────────────────
+function toggleMenu() {
+  document.getElementById('nav-menu').classList.toggle('active');
+}

@@ -310,74 +310,59 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.error { border-left-color: var(--danger); }
 
+/* Ocultar hamburguesa en PC por defecto */
+.hamburger {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--text);
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
 /* =========================================
-   📱 MODO RESPONSIVO (CELULARES Y TABLETS)
+   📱 MODO RESPONSIVO (MENÚ HAMBURGUESA)
    ========================================= */
 @media (max-width: 768px) {
-  /* Liberamos la pantalla completa */
-  body {
-    display: block !important;
-    height: auto !important;
-    overflow-y: auto !important;
-  }
-
-  /* La barra lateral se vuelve un menú superior */
+  body { display: block !important; height: auto !important; overflow-y: auto !important; }
+  
   .sidebar {
     width: 100% !important;
     height: auto !important;
     position: relative !important;
-    padding: 15px 10px !important;
+    padding: 15px 20px !important;
     border-right: none !important;
     border-bottom: 1px solid var(--border);
   }
 
-  .sidebar hr {
-    display: none !important; /* Ocultamos la línea divisoria */
-  }
+  /* Ajustes del logo en celular */
+  .logo { margin-bottom: 0 !important; border-bottom: none !important; padding-bottom: 0 !important; }
+  
+  /* 1. Mostramos la hamburguesa */
+  .hamburger { display: block !important; }
 
-  /* Los botones del menú se ponen en fila */
+  /* 2. Ocultamos el menú por defecto en celular */
   .nav {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 8px !important;
+    display: none !important;
+    flex-direction: column !important;
     margin-top: 15px !important;
   }
+  
+  /* 3. Clase mágica que mostrará el menú al darle clic */
+  .nav.active { display: flex !important; }
 
-  .nav-item {
-    margin: 0 !important;
-    padding: 8px 12px !important;
-    font-size: 0.85rem !important;
-  }
+  /* Arreglar los botones para que no se estiren raro */
+  .nav-item { width: 100% !important; margin: 0 0 5px 0 !important; justify-content: flex-start !important; }
+  .nav-divider { margin: 10px 0 !important; display: block !important; }
 
-  /* El contenido ocupa el resto del espacio */
-  .main {
-    width: 100% !important;
-    height: auto !important;
-    padding: 15px !important;
-    overflow-y: visible !important;
-  }
-
-  /* Tarjetas de 2 en 2 */
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-
-  .dash-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Permitir deslizar tablas horizontalmente */
-  .panel {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Formularios en una sola columna */
-  .form-row {
-    flex-direction: column !important;
-    gap: 0 !important;
-  }
+  /* Resto del diseño (Tablas y Stats) */
+  .main { width: 100% !important; height: auto !important; padding: 15px !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .dash-grid { grid-template-columns: 1fr !important; }
+  .panel { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .form-row { flex-direction: column !important; gap: 0 !important; }
 }
