@@ -98,6 +98,59 @@ body {
 }
 .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
 
+/* =========================================
+   DASHBOARD HEADER & USER WELCOME
+   ========================================= */
+.dashboard-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.dashboard-header-container .page-sub {
+  margin-bottom: 0; /* Anula el margin-bottom por defecto aquí */
+}
+.dashboard-welcome {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--accent2);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+.user-info {
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+}
+.user-label { color: var(--muted); }
+.user-name { color: var(--text); font-weight: 700; margin-left: 4px; }
+.role-badge {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  margin-left: 6px;
+  font-family: monospace;
+  font-weight: 600;
+}
+
 /* CARDS DASHBOARD */
 .stats-grid {
   display: grid;

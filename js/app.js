@@ -1,4 +1,4 @@
-//Conexion a la base de datos Supabase
+// Conexion a la base de datos Supabase
 const supabaseUrl = 'https://fprbravswyywufwwmvwy.supabase.co';
 const supabaseKey = 'sb_publishable_1_QgPFym2E7U_zfsRr0D3A_kj7ve4aj';
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -23,6 +23,57 @@ async function cerrarSesion() {
 
 console.log('Estado de Supabase:', supabaseClient ? 'Conectado a la nube ☁️' : 'Error');
 
+// ── PERFIL DE USUARIO ─────────────────────────────────
+async function cargarDatosUsuario() {
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+  
+  if (!user || error) return;
+  
+  const metadata = user.user_metadata || {};
+  
+  // Si el usuario aún no tiene nombre, mostramos la primera parte de su correo
+  const nombre = metadata.nombre || user.email.split('@')[0]; 
+  const cargo = metadata.cargo || 'Administrador/a'; 
+
+  // Pintamos los datos en el HTML
+  document.getElementById('display-user-name').textContent = nombre;
+  document.getElementById('display-user-role').textContent = cargo;
+}
+
+function abrirModalPerfil() {
+  document.getElementById('perfil-nombre').value = document.getElementById('display-user-name').textContent;
+  document.getElementById('perfil-cargo').value = document.getElementById('display-user-role').textContent;
+  document.getElementById('modal-perfil').classList.add('open');
+}
+
+function cerrarModalPerfil() {
+  document.getElementById('modal-perfil').classList.remove('open');
+}
+
+async function guardarPerfil() {
+  const nuevoNombre = document.getElementById('perfil-nombre').value.trim();
+  const nuevoCargo = document.getElementById('perfil-cargo').value.trim();
+
+  if (!nuevoNombre || !nuevoCargo) {
+    toast('Por favor llena todos los campos del perfil', true);
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.updateUser({
+    data: { nombre: nuevoNombre, cargo: nuevoCargo }
+  });
+
+  if (error) {
+    toast('Error al guardar el perfil', true);
+  } else {
+    document.getElementById('display-user-name').textContent = nuevoNombre;
+    document.getElementById('display-user-role').textContent = nuevoCargo;
+    cerrarModalPerfil();
+    toast('Perfil actualizado ✓');
+  }
+}
+// ──────────────────────────────────────────────────────
+
 // ── DATA ──────────────────────────────────────────────
 let productos = [];
 let proveedores = [];
@@ -30,22 +81,22 @@ let categorias = [];
 let editingId = null;
 let editingProvId = null;
 
-//carga de datos desde Supabase
+// carga de datos desde Supabase
 async function cargarDatosNube() {
   try {
-    //descargar categorias
-    const{data: catData, error: catError} = await supabaseClient.from('categorias').select('*');
-    if(catError) throw catError;
+    // descargar categorias
+    const { data: catData, error: catError } = await supabaseClient.from('categorias').select('*');
+    if (catError) throw catError;
     categorias = catData;
 
-    //descargar proveedores
-    const{data: provData, error: provError} = await supabaseClient.from('proveedores').select('*');
-    if(provError) throw provError;
+    // descargar proveedores
+    const { data: provData, error: provError } = await supabaseClient.from('proveedores').select('*');
+    if (provError) throw provError;
     proveedores = provData;
 
-    //descargar productos
-    const{data: prodData, error: prodError} = await supabaseClient.from('productos').select('*');
-    if(prodError) throw prodError;
+    // descargar productos
+    const { data: prodData, error: prodError } = await supabaseClient.from('productos').select('*');
+    if (prodError) throw prodError;
     productos = prodData;
 
     console.log("📦 Datos sincronizados desde la nube:", { categorias, proveedores, productos });
@@ -55,9 +106,7 @@ async function cargarDatosNube() {
     console.error('Error al cargar datos:', error);
     toast('Error al cargar datos desde la nube', true);
   }
-
 }
-
 
 // ── NAVIGATION ────────────────────────────────────────
 function navigate(page) {
@@ -65,13 +114,13 @@ function navigate(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.trim().toLowerCase().includes(page === 'dashboard' ? 'dash' : page.slice(0,4)))
+    if (n.textContent.trim().toLowerCase().includes(page === 'dashboard' ? 'dash' : page.slice(0, 4)))
       n.classList.add('active');
   });
   if (page === 'dashboard') renderDashboard();
   if (page === 'inventario') renderInventario();
   if (page === 'proveedores') renderProveedores();
-  if(page === 'historial') renderHistorial();
+  if (page === 'historial') renderHistorial();
 }
 
 // ── TOAST ─────────────────────────────────────────────
@@ -102,7 +151,7 @@ function renderDashboard() {
   // Alert banner
   const alertSection = document.getElementById('alert-section');
   if (empty.length > 0) {
-    alertSection.innerHTML = `<div class="alert-banner">🚫 <strong>${empty.length} producto(s) sin stock:</strong> ${empty.map(p => p.nombre).join(', ')}</div>`;
+    alertSection.innerHTML = `<div class="alert-banner" style="background:var(--danger); color:white; padding:12px; border-radius:8px; margin-bottom:20px;">🚫 <strong>${empty.length} producto(s) sin stock:</strong> ${empty.map(p => p.nombre).join(', ')}</div>`;
   } else {
     alertSection.innerHTML = '';
   }
@@ -159,7 +208,7 @@ function renderInventario() {
   });
 
   if (filtered.length === 0) {
-    tbl.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No se encontraron productos</div></div></td></tr>`;
+    tbl.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon" style="text-align:center;font-size:2rem;margin-top:20px;">📦</div><div class="empty-text" style="text-align:center;color:var(--muted);padding:20px;">No se encontraron productos</div></div></td></tr>`;
     return;
   }
 
@@ -199,7 +248,7 @@ function openModal(id = null) {
   selProv.innerHTML = '<option value="">-- Sin proveedor --</option>' +
     proveedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
 
-    //Inyectar lista de categorias
+  // Inyectar lista de categorias
   const selCat = document.getElementById('inp-cat');
   selCat.innerHTML = categorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
 
@@ -208,7 +257,7 @@ function openModal(id = null) {
     document.getElementById('modal-producto-title').textContent = 'Editar Producto';
     document.getElementById('inp-nombre').value = p.nombre;
 
-    //nombres de columna de la base de datos
+    // nombres de columna de la base de datos
     document.getElementById('inp-cat').value = p.categoria_id;
     document.getElementById('inp-cantidad').value = p.cantidad;
     document.getElementById('inp-precio').value = p.precio;
@@ -216,11 +265,11 @@ function openModal(id = null) {
     document.getElementById('inp-prov').value = p.proveedor_id || '';
   } else {
     document.getElementById('modal-producto-title').textContent = 'Agregar Producto';
-    ['inp-nombre','inp-cantidad','inp-precio','inp-minimo'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('inp-cat').value = 'Lácteos';
+    ['inp-nombre', 'inp-cantidad', 'inp-precio', 'inp-minimo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('inp-cat').value = '';
     document.getElementById('inp-prov').value = '';
 
-    if(categorias.length > 0){
+    if (categorias.length > 0) {
       document.getElementById('inp-cat').value = categorias[0].id;
     } 
   }
@@ -229,17 +278,17 @@ function openModal(id = null) {
 
 function closeModal() { document.getElementById('modal-producto').classList.remove('open'); editingId = null; }
 
-async function guardarProveedor(){
+async function guardarProveedor() {
   const nombre = document.getElementById('pinp-nombre').value.trim();
   const telefono = document.getElementById('pinp-tel').value.trim();
 
-  if(!nombre || !telefono){
+  if (!nombre || !telefono) {
     toast('El nombre y el telefono son requeridos', true);
     return;
   }
   
-  try{
-    if(editingProvId){
+  try {
+    if (editingProvId) {
       const { error } = await supabaseClient
       .from('proveedores')
       .update({ nombre, telefono })
@@ -258,7 +307,7 @@ async function guardarProveedor(){
     }
 
     closeProvModal();
-    await cargarDatosNube(); // Esto reemplaza tu vieja función save() y renderProveedores()
+    await cargarDatosNube();
 
   } catch (error) {
     toast('Error al guardar el proveedor', true);
@@ -274,12 +323,12 @@ async function guardarProducto() {
   const categoria = document.getElementById('inp-cat').value;
   const proveedorId = document.getElementById('inp-prov').value || null;
 
-
   if (!nombre || isNaN(cantidad) || isNaN(precio)) {
     toast('Por favor llena todos los campos requeridos', true); return;
   }
-try {   
-   if (editingId) {
+  
+  try {   
+    if (editingId) {
       const { error } = await supabaseClient
         .from('productos')
         .update({ nombre, cantidad, precio, categoria_id: categoria, proveedor_id: proveedorId, minimo })
@@ -291,7 +340,7 @@ try {
       const { error } = await supabaseClient
         .from('productos')
         .insert([{ 
-          id: crypto.randomUUID(), // <--- EL FIX ESTÁ AQUÍ
+          id: crypto.randomUUID(),
           nombre, 
           cantidad, 
           precio, 
@@ -306,25 +355,27 @@ try {
     }
 
     closeModal();
-    await cargarDatosNube(); // Esto reemplaza tu vieja función save() y renderInventario()
+    await cargarDatosNube();
   } catch (error) {
     alert("ERROR DE SUPABASE: \n" + error.message + "\n\nDETALLES: " + error.details);
     toast('Error al guardar el producto', true);
   }
 }
 
-
 function editProducto(id) { navigate('inventario'); openModal(id); }
 
 async function deleteProducto(id) {
   if (!confirm('¿Eliminar este producto?')) return;
   try {
+    const p = productos.find(x => x.id === id);
     const { error } = await supabaseClient
       .from('productos')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
+    
+    if (p) await registrarMovimiento('Eliminación', `Se eliminó el producto: ${p.nombre}.`);
     toast('Producto eliminado');
     await cargarDatosNube();
   } catch (error) {
@@ -340,7 +391,7 @@ function renderProveedores() {
   const filtered = proveedores.filter(v => v.nombre.toLowerCase().includes(q));
 
   if (filtered.length === 0) {
-    tbl.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="empty-icon">🏭</div><div class="empty-text">No se encontraron proveedores</div></div></td></tr>`;
+    tbl.innerHTML = `<tr><td colspan="4"><div class="empty" style="text-align:center;padding:20px;color:var(--muted);"><div class="empty-icon" style="font-size:2rem;margin-bottom:10px;">🏭</div><div class="empty-text">No se encontraron proveedores</div></div></td></tr>`;
     return;
   }
 
@@ -375,7 +426,6 @@ function openProvModal(id = null) {
 
 function closeProvModal() { document.getElementById('modal-proveedor').classList.remove('open'); editingProvId = null; }
 
-
 function editProveedor(id) { openProvModal(id); }
 
 async function deleteProveedor(id) {
@@ -394,11 +444,16 @@ async function deleteProveedor(id) {
   }
 }
 
-// Close modals on overlay click
-document.getElementById('modal-producto').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-document.getElementById('modal-proveedor').addEventListener('click', e => { if (e.target === e.currentTarget) closeProvModal(); });
+// Cerrar modales al hacer clic fuera
+document.getElementById('modal-producto')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('modal-proveedor')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeProvModal(); });
+document.getElementById('modal-perfil')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalPerfil(); });
 
-document.addEventListener('DOMContentLoaded', () => {
+// ── INICIALIZACIÓN PRINCIPAL ──────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Primero cargamos los datos del usuario conectado
+  await cargarDatosUsuario();
+  // Luego cargamos los productos, proveedores y categorías
   cargarDatosNube();
 });
 
@@ -545,4 +600,3 @@ async function renderHistorial() {
     `;
   }).join('');
 }
-

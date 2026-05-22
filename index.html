@@ -42,8 +42,26 @@
 
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
-    <div class="page-title">Dashboard</div>
-    <div class="page-sub">Resumen general del inventario</div>
+    
+    <!-- NUEVO ENCABEZADO CON USUARIO ACTIVO -->
+    <div class="dashboard-header-container">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Resumen general del inventario</div>
+      </div>
+      
+      <div class="dashboard-welcome">
+  <div class="pulse-indicator"></div>
+  <div class="user-info">
+    <span class="user-label">Usuario online:</span> 
+    <strong class="user-name" id="display-user-name">Cargando...</strong> 
+    <span class="role-badge" id="display-user-role">...</span>
+    <button class="btn btn-sm btn-ghost" onclick="abrirModalPerfil()" style="margin-left: 12px; padding: 4px 8px; font-size: 0.75rem;">
+      ✏️ Editar Perfil
+    </button>
+  </div>
+</div>
+    </div>
 
     <div class="stats-grid">
       <div class="stat-card" style="--card-color: var(--accent)">
@@ -169,6 +187,8 @@
       </table>
     </div>
   </div>
+  
+  <!-- HISTORIAL -->
   <div class="page" id="page-historial">
     <div class="page-title">Historial de Movimientos</div>
     <div class="page-sub">Registro de auditoría del sistema</div>
@@ -255,11 +275,32 @@
     </div>
   </div>
 </div>
+<!-- MODAL PERFIL DE USUARIO -->
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal">
+    <div class="modal-title">Mi Perfil</div>
+    
+    <div class="form-group">
+      <label>Nombre a mostrar</label>
+      <input type="text" id="perfil-nombre" placeholder="Ej: Ana Gabriela">
+    </div>
+    
+    <div class="form-group">
+      <label>Cargo / Rol en la Tienda</label>
+      <input type="text" id="perfil-cargo" placeholder="Ej: Administradora">
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModalPerfil()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPerfil()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/app.js"></script>
 </body>
