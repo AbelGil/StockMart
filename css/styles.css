@@ -328,41 +328,57 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
    📱 MODO RESPONSIVO (MENÚ HAMBURGUESA)
    ========================================= */
 @media (max-width: 768px) {
-  body { display: block !important; height: auto !important; overflow-y: auto !important; }
-  
+  body { display: block; }
+
   .sidebar {
-    width: 100% !important;
-    height: auto !important;
-    position: relative !important;
-    padding: 15px 20px !important;
-    border-right: none !important;
+    width: 100%;
+    height: auto;
+    min-height: unset;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: auto;
+    padding: 12px 20px;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
     border-bottom: 1px solid var(--border);
+    z-index: 100;
   }
 
-  /* Ajustes del logo en celular */
-  .logo { margin-bottom: 0 !important; border-bottom: none !important; padding-bottom: 0 !important; }
-  
-  /* 1. Mostramos la hamburguesa */
-  .hamburger { display: block !important; }
+  .sidebar-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-  /* 2. Ocultamos el menú por defecto en celular */
+  .logo { padding: 0; border-bottom: none; }
+
+  .hamburger { display: block; }
+
   .nav {
-    display: none !important;
-    flex-direction: column !important;
-    margin-top: 15px !important;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
+    box-shadow: var(--shadow-md);
   }
-  
-  /* 3. Clase mágica que mostrará el menú al darle clic */
-  .nav.active { display: flex !important; }
 
-  /* Arreglar los botones para que no se estiren raro */
-  .nav-item { width: 100% !important; margin: 0 0 5px 0 !important; justify-content: flex-start !important; }
-  .nav-divider { margin: 10px 0 !important; display: block !important; }
+  .nav.active { display: flex; flex-direction: column; }
 
-  /* Resto del diseño (Tablas y Stats) */
-  .main { width: 100% !important; height: auto !important; padding: 15px !important; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .dash-grid { grid-template-columns: 1fr !important; }
-  .panel { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-  .form-row { flex-direction: column !important; gap: 0 !important; }
+  .nav-item { padding: 14px 24px; border-left: none; }
+
+  .main {
+    margin-left: 0;
+    padding: 20px 16px;
+    margin-top: 64px;
+  }
+
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .panel { overflow-x: auto; }
+  .form-row { grid-template-columns: 1fr; }
+  .toolbar { flex-wrap: wrap; }
 }
