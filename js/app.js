@@ -71,6 +71,7 @@ function navigate(page) {
   if (page === 'dashboard') renderDashboard();
   if (page === 'inventario') renderInventario();
   if (page === 'proveedores') renderProveedores();
+  if(page === 'historial') renderHistorial();
 }
 
 // ── TOAST ─────────────────────────────────────────────
@@ -131,6 +132,7 @@ function renderDashboard() {
         <td>$${parseFloat(p.precio).toFixed(2)}</td>
       </tr>`).join('');
   }
+  renderGrafica();
 }
 
 // ── INVENTARIO ────────────────────────────────────────
@@ -282,7 +284,7 @@ try {
         .from('productos')
         .update({ nombre, cantidad, precio, categoria_id: categoria, proveedor_id: proveedorId, minimo })
         .eq('id', editingId);
-
+        await registrarMovimiento('Actualización', `Se modificó el producto: ${nombre}.`);
       if (error) throw error;
       toast('Producto actualizado ✓');
     } else {
@@ -297,6 +299,7 @@ try {
           proveedor_id: proveedorId, 
           minimo 
         }]);
+        await registrarMovimiento('Entrada', `Se agregó el producto nuevo: ${nombre} (${cantidad} unidades).`);
 
       if (error) throw error;
       toast('Producto agregado ✓');
@@ -403,3 +406,143 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleMenu() {
   document.getElementById('nav-menu').classList.toggle('active');
 }
+
+let graficaCategorias = null;
+
+function renderGrafica() {
+  const ctx = document.getElementById('grafica-categorias').getContext('2d');
+
+  // Agrupar stock por categoría
+  const datos = {};
+  productos.forEach(p => {
+    const cat = categorias.find(c => c.id === p.categoria_id);
+    const nombre = cat ? cat.nombre : 'Sin categoría';
+    datos[nombre] = (datos[nombre] || 0) + p.cantidad;
+  });
+
+  const labels = Object.keys(datos);
+  const values = Object.values(datos);
+
+  // Si ya existe la gráfica, destruirla antes de redibujar
+  if (graficaCategorias) graficaCategorias.destroy();
+
+  graficaCategorias = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Unidades en stock',
+        data: values,
+        backgroundColor: '#2563eb',
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#e2e8f0' },
+          ticks: { color: '#64748b' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#64748b' }
+        }
+      }
+    }
+  });
+}
+
+function exportarCSV() {
+  if (productos.length === 0) {
+    toast('No hay productos para exportar', true);
+    return;
+  }
+
+  const encabezado = ['Nombre', 'Categoría', 'Cantidad', 'Precio', 'Stock Mínimo', 'Proveedor', 'Estado'];
+
+  const filas = productos.map(p => {
+    const cat = categorias.find(c => c.id === p.categoria_id);
+    const prov = proveedores.find(v => v.id === p.proveedor_id);
+    const estado = p.cantidad === 0 ? 'Sin stock' : p.cantidad <= (p.minimo || 5) ? 'Stock bajo' : 'Disponible';
+
+    return [
+      p.nombre,
+      cat ? cat.nombre : '—',
+      p.cantidad,
+      p.precio,
+      p.minimo || 5,
+      prov ? prov.nombre : '—',
+      estado
+    ];
+  });
+
+  const csv = [encabezado, ...filas]
+    .map(fila => fila.map(celda => `"${celda}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `stockmart_${new Date().toLocaleDateString('es-MX').replace(/\//g, '-')}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+
+  toast('Inventario exportado ✓');
+}
+
+async function registrarMovimiento(accion, descripcion) {
+  try {
+    await supabaseClient.from('historial').insert([{ accion, descripcion }]);
+  } catch (error) {
+    console.error('Error al guardar historial:', error);
+  }
+}
+
+async function renderHistorial() {
+  const tbody = document.getElementById('historial-table');
+  
+  const { data, error } = await supabaseClient
+    .from('historial')
+    .select('*')
+    .order('fecha', { ascending: false })
+    .limit(50); // Muestra los últimos 50 movimientos
+
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="3">Error al cargar historial</td></tr>`;
+    return;
+  }
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay movimientos registrados</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(mov => {
+    // Formatear la fecha para que se vea bonita
+    const fecha = new Date(mov.fecha).toLocaleString('es-MX', { 
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' 
+    });
+    
+    // Ponerle color a la acción
+    let colorAccion = 'var(--text)';
+    if(mov.accion === 'Entrada') colorAccion = 'var(--accent)';
+    if(mov.accion === 'Salida' || mov.accion === 'Eliminación') colorAccion = 'var(--danger)';
+    if(mov.accion === 'Actualización') colorAccion = 'var(--warn)';
+
+    return `
+      <tr>
+        <td style="color: var(--muted); font-size: 0.9em;">${fecha}</td>
+        <td style="color: ${colorAccion}; font-weight: bold;">${mov.accion}</td>
+        <td>${mov.descripcion}</td>
+      </tr>
+    `;
+  }).join('');
+}
+

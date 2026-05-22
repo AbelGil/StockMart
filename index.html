@@ -25,6 +25,9 @@
     <div class="nav-item" onclick="navigate('proveedores')">
       <span class="nav-icon">🏭</span> Proveedores
     </div>
+    <div class="nav-item" onclick="navigate('historial')">
+      <span class="nav-icon">🕒</span> Historial
+    </div>
     
     <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 24px;" class="nav-divider">
     
@@ -87,6 +90,14 @@
         </div>
       </div>
     </div>
+
+    <div class="panel" style="margin-top: 24px;">
+      <div class="panel-header">📊 Stock por categoría</div>
+      <div class="panel-body" style="padding: 24px;">
+       <canvas id="grafica-categorias" height="100"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <!-- INVENTARIO -->
@@ -110,6 +121,7 @@
         <option value="Otros">Otros</option>
       </select>
       <button class="btn btn-primary" onclick="openModal()">+ Agregar Producto</button>
+      <button class="btn btn-ghost" onclick="exportarCSV()">⬇️ Exportar CSV</button>
     </div>
 
     <div class="panel">
@@ -157,7 +169,25 @@
       </table>
     </div>
   </div>
+  <div class="page" id="page-historial">
+    <div class="page-title">Historial de Movimientos</div>
+    <div class="page-sub">Registro de auditoría del sistema</div>
 
+    <div class="panel" style="margin-top: 20px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Acción</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody id="historial-table">
+          <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">Cargando movimientos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </main>
 
 <!-- MODAL PRODUCTO -->
@@ -230,6 +260,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
